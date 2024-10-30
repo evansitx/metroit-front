@@ -1,12 +1,8 @@
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
-import Header from "./components/header";
-
-function App() {
+import reactLogo from "../assets/react.svg";
+import viteLogo from "../.././public/vite.svg";
+const Home = () => {
   return (
     <>
-      <Header />
       <div className="flex flex-col justify-center text-center mt-10">
         <div className="flex justify-center">
           <a href="https://vitejs.dev" target="_blank">
@@ -22,6 +18,5 @@ function App() {
       </div>
     </>
   );
-}
-
-export default App;
+};
+export default Home;
