@@ -1,6 +1,8 @@
-import reactLogo from "../assets/react.svg";
-import viteLogo from "../.././public/vite.svg";
+import reactLogo from "../assets/img/react.svg";
+import viteLogo from "../assets/img/vite.svg";
+import usePageTitle from "../hooks/usePageTitle";
 const Home = () => {
+  usePageTitle("Inicio");
   return (
     <>
       <div className="flex flex-col justify-center text-center mt-10">

@@ -1,9 +1,9 @@
+import { Link, NavLink, useLocation } from "react-router-dom";
 import {
   Navbar,
   NavbarBrand,
   NavbarContent,
   NavbarItem,
-  Link,
   Button,
 } from "@nextui-org/react";
 
@@ -12,22 +12,21 @@ const HeadingNavbar = () => {
     <>
       <Navbar>
         <NavbarBrand>
-          <p className="font-bold text-inherit">METROIT</p>
+          <Link to="/" className="block text-xl">
+            <h1 className="font-bold text-xl">
+              <b className="text-slate-600">MetroIT</b>
+            </h1>
+            <img
+              src="/img/ebenezer-logo-horizontal.svg"
+              alt=""
+              className="w-[200px]"
+            />
+          </Link>
         </NavbarBrand>
         <NavbarContent className="sm:flex gap-4" justify="center">
           <NavbarItem>
-            <Link color="foreground" href="#">
-              Features
-            </Link>
-          </NavbarItem>
-          <NavbarItem isActive>
-            <Link href="#" aria-current="page">
-              Customers
-            </Link>
-          </NavbarItem>
-          <NavbarItem>
-            <Link color="foreground" href="#">
-              Integrations
+            <Link to="/campaign" color="foreground" href="#">
+              Campaign
             </Link>
           </NavbarItem>
         </NavbarContent>

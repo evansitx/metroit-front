@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
-import Header from "../components/header.jsx";
+import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
+import BackToTop from "../components/utils/BackToTop.jsx";
 
 const Layout = () => {
   return (
@@ -9,13 +10,14 @@ const Layout = () => {
         <Header />
       </div>
 
-      <main>
+      <main className="mt-5 flex flex-col items-center px-5 lg:p-0">
         <Outlet />
       </main>
 
-      <div>
+      <div className="mt-5 flex flex-col items-center px-5 lg:p-0">
         <Footer />
       </div>
+      <BackToTop />
     </>
   );
 };
