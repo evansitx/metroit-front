@@ -1,4 +1,4 @@
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   Navbar,
   NavbarBrand,
@@ -6,21 +6,27 @@ import {
   NavbarItem,
   Button,
 } from "@nextui-org/react";
+import metroidLogo from "../assets/img/metroid-logo.png";
+
 
 const HeadingNavbar = () => {
   return (
     <>
       <Navbar>
         <NavbarBrand>
-          <Link to="/" className="block text-xl">
-            <h1 className="font-bold text-xl">
-              <b className="text-slate-600">MetroIT</b>
-            </h1>
-            <img
-              src="/img/ebenezer-logo-horizontal.svg"
-              alt=""
-              className="w-[200px]"
-            />
+          <Link to="/" className="flex items-center gap-2">
+            <div>
+              <img
+                src={metroidLogo}
+                alt=""
+                className="w-[30px]"
+              />
+            </div>
+            <div>
+              <h1 className="font-bold text-xl">
+                <b className="text-slate-600">MetroIT</b>
+              </h1>
+            </div>
           </Link>
         </NavbarBrand>
         <NavbarContent className="sm:flex gap-4" justify="center">
