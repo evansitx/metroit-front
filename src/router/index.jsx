@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 
 import Home from "../pages/Home";
-import Layout from "../layout/Layout";
+import PublicLayout from "../layout/PublicLayout";
 import NotFound from "../pages/NotFound";
 import Campaign from "../pages/Campaign";
 import Login from "../pages/Login";
@@ -10,7 +10,7 @@ import PrivateLayout from "../layout/PrivateLayout";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: <PublicLayout />,
     errorElement: <NotFound />,
     children: [
       {
