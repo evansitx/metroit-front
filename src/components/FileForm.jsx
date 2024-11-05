@@ -1,10 +1,12 @@
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { Button, Image } from "@nextui-org/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import axios from "axios";
 
 const FileForm = () => {
   const [previews, setPreviews] = useState([]);
+  const inputFile = useRef(null);
 
   const validFileExtensions = {
     image: ["jpg", "gif", "png", "jpeg", "svg", "webp"],
@@ -17,7 +19,7 @@ const FileForm = () => {
 
   const validationSchema = Yup.object().shape({
     images: Yup.array()
-      .min(1, "Añade al menos un archivo")
+      .min(1, "Añade al menos una carpeta")
       .test("not-valid-types", "Algunos archivos no son válidos", (value) => {
         return value?.every((file) => isValidFileType(file.name, "image"));
       }),
@@ -25,7 +27,7 @@ const FileForm = () => {
 
   const handleFileChange = (event, setFieldValue) => {
     const files = Array.from(event.currentTarget.files);
-    // Filtra solo archivos de imágenes y extrae el nombre, ruta y tamaño
+
     const imageFiles = files
       .filter((file) => isValidFileType(file.name))
       .map((file) => ({
@@ -41,13 +43,24 @@ const FileForm = () => {
     }));
 
     setPreviews(previewUrls);
-
-    console.log("Archivos de imagen seleccionados:", files);
     setFieldValue("images", imageFiles);
+    console.log(files);
   };
 
   const onSubmit = (values, { resetForm }) => {
-    console.log("Formulario enviado con valores:", values);
+    // axios
+    //   .post("https://api.metroit.com", {
+    //     values: values,
+    //   })
+    //   .then(function (response) {
+    //     console.log(response);
+    //   })
+    //   .catch(function (error) {
+    //     console.log(error);
+    //   });
+
+    console.log(`Se han enviado ${values?.images?.length} imágenes`);
+    inputFile.current.value = "";
     resetForm();
   };
 
@@ -67,51 +80,73 @@ const FileForm = () => {
       }) => (
         <>
           <div className="w-6/12">
-            <input
-              type="file"
-              name="images"
-              className="flex h-9 w-full rounded-md border bg-background px-3 border-blue-600 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-foreground file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-              webkitdirectory="true"
-              multiple
-              onChange={(event) => handleFileChange(event, setFieldValue)}
-            />
-            {errors.images && touched.images}
-            {errors.images && touched.images ? errors.images : ""}
-            <div className="mt-2">
-              {values.images && previews.length > 0 && (
-                <ul className="grid grid-cols-2 gap-2">
-                  {values.images.map((file, index) => (
-                    <li
-                      key={index}
-                      className="border p-2 rounded-md border-blue-600"
-                    >
-                      <p className="text-sm">
-                        <strong>Nombre:</strong> {file.name} <br />
-                        <strong>Ruta:</strong> {file.path} <br />
-                        <strong>Tamaño:</strong> {file.size} bytes
-                      </p>
-                      <Image
-                        src={previews[index]?.url}
-                        alt={`Previsualización de ${file.name}`}
-                        width={350}
-                        className="rounded-md"
-                      />
-                    </li>
-                  ))}
-                </ul>
-              )}
+            <div className="flex gap-2">
+              <div className="w-full">
+                <input
+                  ref={inputFile}
+                  type="file"
+                  name="images"
+                  className="flex h-9 w-full rounded-md border bg-background px-3 border-blue-600 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-foreground file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  webkitdirectory="true"
+                  multiple
+                  onChange={(event) => handleFileChange(event, setFieldValue)}
+                />
+                {errors.images && touched.images && (
+                  <div className=" mt-2 relative block w-full rounded-lg bg-red-600 p-2 opacity-100">
+                    <p className="text-base text-white font-regular">
+                      {errors.images}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <Button
+                  color="primary"
+                  onClick={handleSubmit}
+                  isLoading={isSubmitting}
+                >
+                  {isSubmitting ? "Procesando..." : "Procesar imágenes"}
+                </Button>
+              </div>
+            </div>
+            <div>
+              <div className="mt-2">
+                {values?.images && previews.length > 0 && (
+                  <>
+                    {values.images.length > 0 && (
+                      <div>
+                        <p>Se han cargado {values?.images?.length} imágenes</p>
+                      </div>
+                    )}
+
+                    <ul className="grid grid-cols-3 gap-2 my-2">
+                      {values.images.map((file, index) => (
+                        <li
+                          key={index}
+                          className="border p-2 rounded-md border-blue-600"
+                        >
+                          <p className="text-sm">
+                            <strong>Nombre:</strong> {file.name} <br />
+                            <strong>Ruta:</strong> {file.path} <br />
+                            <strong>Tamaño:</strong> {file.size} bytes
+                          </p>
+                          <Image
+                            src={previews[index]?.url}
+                            alt={`Previsualización de ${file.name}`}
+                            width={200}
+                            className="rounded-md"
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-          <br />
 
-          <Button
-            color="primary"
-            onClick={handleSubmit}
-            isLoading={isSubmitting}
-            disabled={isSubmitting}
-          >
-            Procesar imágenes
-          </Button>
+          <br />
         </>
       )}
     </Formik>
