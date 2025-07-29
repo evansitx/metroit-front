@@ -24,6 +24,7 @@ const router = createBrowserRouter([
     element: <PrivateLayout />,
     children: [
       {
+        index: true,
         path: "home",
         element: <Home />,
       },
