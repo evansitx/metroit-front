@@ -7,20 +7,17 @@ import {
   Button,
 } from "@nextui-org/react";
 import metroidLogo from "../assets/img/metroid-logo.png";
-
+import { useAuth } from "../context/AuthContext";
 
 const HeadingNavbar = () => {
+  const { user, logout } = useAuth();
   return (
     <>
       <Navbar>
         <NavbarBrand>
           <Link to="/" className="flex items-center gap-2">
             <div>
-              <img
-                src={metroidLogo}
-                alt=""
-                className="w-[30px]"
-              />
+              <img src={metroidLogo} alt="" className="w-[30px]" />
             </div>
             <div>
               <h1 className="font-bold text-xl">
@@ -44,6 +41,7 @@ const HeadingNavbar = () => {
             <Button as={Link} color="primary" href="#" variant="flat">
               Sign Up
             </Button>
+            <button onClick={logout}>{user}</button>
           </NavbarItem>
         </NavbarContent>
       </Navbar>
