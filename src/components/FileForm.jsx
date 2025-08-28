@@ -33,7 +33,7 @@ const FileForm = () => {
 
   const onSubmit = (values, { resetForm }) => {
     axios
-      .post("http://localhost:3333/campaign/make", {
+      .post(`${import.meta.env.VITE_API_URL}/campaign/make`, {
         values: values,
       })
       .then(function (response) {
