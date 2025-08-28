@@ -5,12 +5,12 @@ import {
   NavbarContent,
   NavbarItem,
   Button,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import metroidLogo from "../assets/img/metroid-logo.png";
 import { useAuth } from "../context/AuthContext";
 
 const HeadingNavbar = () => {
-  const { user, logout } = useAuth();
+  // const { user, logout } = useAuth();
   return (
     <>
       <Navbar>
@@ -41,7 +41,7 @@ const HeadingNavbar = () => {
             <Button as={Link} color="primary" href="#" variant="flat">
               Sign Up
             </Button>
-            <button onClick={logout}>{user}</button>
+            {/* <button onClick={logout}>{user}</button> */}
           </NavbarItem>
         </NavbarContent>
       </Navbar>
