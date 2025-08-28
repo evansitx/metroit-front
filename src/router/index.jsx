@@ -8,17 +8,17 @@ import Login from "../pages/Login";
 import PrivateLayout from "../layout/PrivateLayout";
 
 const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <PublicLayout />,
-    errorElement: <NotFound />,
-    children: [
-      {
-        index: true,
-        element: <Login />,
-      },
-    ],
-  },
+  // {
+  //   path: "/",
+  //   element: <PublicLayout />,
+  //   errorElement: <NotFound />,
+  //   children: [
+  //     {
+  //       index: true,
+  //       element: <Login />,
+  //     },
+  //   ],
+  // },
   {
     path: "/",
     element: <PrivateLayout />,
