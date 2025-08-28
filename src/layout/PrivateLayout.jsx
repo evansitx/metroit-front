@@ -5,11 +5,11 @@ import BackToTop from "../components/utils/BackToTop.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 
 const PrivateLayout = () => {
-  const { usuario, loading } = useAuth();
+  // const { usuario, loading } = useAuth();
 
-  if (loading) return <p>Cargando...</p>;
+  // if (loading) return <p>Cargando...</p>;
 
-  if (!usuario) return <Navigate to="/" replace />;
+  // if (!usuario) return <Navigate to="/" replace />;
   return (
     <>
       <div>
