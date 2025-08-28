@@ -1,41 +1,27 @@
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { Button, Image } from "@nextui-org/react";
-import { useRef, useState } from "react";
+import { Button, Image } from "@heroui/react";
+import { useState } from "react";
 import axios from "axios";
+import FileFolderInput from "./FileFolderInput";
+import Swal from "sweetalert2";
 
 const FileForm = () => {
   const [previews, setPreviews] = useState([]);
-  const inputFile = useRef(null);
-
-  const validFileExtensions = {
-    image: ["jpg", "gif", "png", "jpeg", "svg", "webp"],
-  };
-
-  const isValidFileType = (fileName, fileType = "image") => {
-    const extension = fileName?.split(".").pop().toLowerCase();
-    return extension && validFileExtensions[fileType]?.includes(extension);
-  };
+  const [httpStatus, setHttpStatus] = useState(null);
 
   const validationSchema = Yup.object().shape({
-    images: Yup.array()
-      .min(1, "Añade al menos una carpeta")
-      .test("not-valid-types", "Algunos archivos no son válidos", (value) => {
-        return value?.every((file) => isValidFileType(file.name, "image"));
-      }),
+    images: Yup.array().min(1, "Añade al menos un archivo"),
   });
 
   const handleFileChange = (event, setFieldValue) => {
-    const files = Array.from(event.currentTarget.files);
-
-    const imageFiles = files
-      .filter((file) => isValidFileType(file.name))
-      .map((file) => ({
-        file: file,
-        name: file.name,
-        path: file.webkitRelativePath,
-        size: file.size,
-      }));
+    // console.log(event);
+    const imageFiles = event.map((file) => ({
+      file: file,
+      name: file.name,
+      path: file.webkitRelativePath,
+      size: file.size,
+    }));
 
     const previewUrls = imageFiles.map((fileObj) => ({
       name: fileObj.name,
@@ -44,23 +30,30 @@ const FileForm = () => {
 
     setPreviews(previewUrls);
     setFieldValue("images", imageFiles);
-    console.log(files);
   };
 
   const onSubmit = (values, { resetForm }) => {
-    // axios
-    //   .post("https://api.metroit.com", {
-    //     values: values,
-    //   })
-    //   .then(function (response) {
-    //     console.log(response);
-    //   })
-    //   .catch(function (error) {
-    //     console.log(error);
-    //   });
+    axios
+      .post("http://localhost:3333/campaign/make", {
+        values: values,
+      })
+      .then(function (response) {
+        console.log(response);
+        setHttpStatus(response);
+        Swal.fire({
+          title: "Good job!",
+          text: response.data.status,
+          icon: "success",
+          timer: 1500,
+        });
+      })
+      .catch(function (error) {
+        console.log(error);
+        setHttpStatus(error);
+      });
 
-    console.log(`Se han enviado ${values?.images?.length} imágenes`);
-    inputFile.current.value = "";
+    console.log(`Se han enviado ${values?.images?.length} archivos`);
+
     resetForm();
   };
 
@@ -79,22 +72,37 @@ const FileForm = () => {
         values,
       }) => (
         <>
-          <div className="w-6/12">
-            <div className="flex gap-2">
+          <div className="w-3/4">
+            <div className="flex gap-2 flex-col">
               <div className="w-full">
-                <input
-                  ref={inputFile}
-                  type="file"
-                  name="images"
-                  className="flex h-9 w-full rounded-md border bg-background px-3 border-blue-600 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-foreground file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                  webkitdirectory="true"
-                  multiple
-                  onChange={(event) => handleFileChange(event, setFieldValue)}
+                <FileFolderInput
+                  onFilesChange={(event) =>
+                    handleFileChange(event, setFieldValue)
+                  }
                 />
+
                 {errors.images && touched.images && (
                   <div className=" mt-2 relative block w-full rounded-lg bg-red-600 p-2 opacity-100">
                     <p className="text-base text-white font-regular">
-                      {errors.images}
+                      {/* {errors.images} */}
+                      {Swal.fire({
+                        title: "Good job!",
+                        text: errors.images,
+                        icon: "warning",
+                      })}
+                    </p>
+                  </div>
+                )}
+                {httpStatus != null && (
+                  <div
+                    className={`mt-2 relative block w-full rounded-lg 
+                      ${
+                        httpStatus.data ? "bg-green-600" : "bg-red-600"
+                      } p-2 opacity-100`}
+                  >
+                    <p className="text-base text-white font-regular">
+                      {httpStatus?.data?.status}
+                      {httpStatus?.message}
                     </p>
                   </div>
                 )}
@@ -116,11 +124,13 @@ const FileForm = () => {
                   <>
                     {values.images.length > 0 && (
                       <div>
-                        <p>Se han cargado {values?.images?.length} imágenes</p>
+                        <p>
+                          Se han cargado {values?.images?.length} archivo(s)
+                        </p>
                       </div>
                     )}
 
-                    <ul className="grid grid-cols-3 gap-2 my-2">
+                    <ul className="grid grid-cols-5 gap-2 my-2">
                       {values.images.map((file, index) => (
                         <li
                           key={index}
@@ -130,12 +140,14 @@ const FileForm = () => {
                             <strong>Nombre:</strong> {file.name} <br />
                             <strong>Ruta:</strong> {file.path} <br />
                             <strong>Tamaño:</strong> {file.size} bytes
+                            <br />
+                            <strong>Tipo:</strong> {file?.file?.type}
                           </p>
                           <Image
                             src={previews[index]?.url}
                             alt={`Previsualización de ${file.name}`}
                             width={200}
-                            className="rounded-md"
+                            className="rounded-md mt-3"
                           />
                         </li>
                       ))}
