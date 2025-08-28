@@ -18,6 +18,7 @@ const FileForm = () => {
     const imageFiles = event.map((file) => ({
       file: file,
       name: file.name,
+      type: file.type,
       path: file.webkitRelativePath,
       size: file.size,
     }));
@@ -31,23 +32,33 @@ const FileForm = () => {
     setFieldValue("images", imageFiles);
   };
 
-  const onSubmit = (values, { resetForm }) => {
+  const onSubmit = (values, { resetForm, setSubmitting }) => {
+    const bodyFormData = new FormData();
+    values.images.forEach((file) => {
+      bodyFormData.append("images", file.file || file);
+    });
+    console.log(values.images);
+
     axios
-      .post(`${import.meta.env.VITE_API_URL}/campaign/make`, {
-        values: values,
+      .post(`${import.meta.env.VITE_API_URL}/campaign/make`, bodyFormData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       })
       .then(function (response) {
         console.log(response);
+        // console.log(values);
         setHttpStatus(response);
+        resetForm();
       })
       .catch(function (error) {
         console.log(error);
         setHttpStatus(error);
+      })
+      .finally(() => {
+        setSubmitting(false);
       });
-
     console.log(`Se han enviado ${values?.images?.length} archivos`);
-
-    resetForm();
   };
 
   return (
@@ -63,6 +74,7 @@ const FileForm = () => {
         touched,
         isSubmitting,
         values,
+        resetForm,
       }) => (
         <>
           <div className="w-3/4">
@@ -73,7 +85,6 @@ const FileForm = () => {
                     handleFileChange(event, setFieldValue)
                   }
                 />
-
                 {errors.images && touched.images && (
                   <div className=" mt-2 relative block w-full rounded-lg bg-red-600 p-2 opacity-100">
                     <p className="text-base text-white font-regular">
@@ -95,6 +106,11 @@ const FileForm = () => {
                   </div>
                 )}
               </div>
+              {values.images.length > 0 && (
+                <div>
+                  <Button onClick={resetForm}>Limpiar</Button>
+                </div>
+              )}
 
               <div>
                 <Button
