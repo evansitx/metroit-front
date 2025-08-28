@@ -1,10 +1,9 @@
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { Button, Image } from "@heroui/react";
+import { Button, Image } from "@nextui-org/react";
 import { useState } from "react";
 import axios from "axios";
 import FileFolderInput from "./FileFolderInput";
-import Swal from "sweetalert2";
 
 const FileForm = () => {
   const [previews, setPreviews] = useState([]);
@@ -40,12 +39,6 @@ const FileForm = () => {
       .then(function (response) {
         console.log(response);
         setHttpStatus(response);
-        Swal.fire({
-          title: "Good job!",
-          text: response.data.status,
-          icon: "success",
-          timer: 1500,
-        });
       })
       .catch(function (error) {
         console.log(error);
@@ -84,12 +77,7 @@ const FileForm = () => {
                 {errors.images && touched.images && (
                   <div className=" mt-2 relative block w-full rounded-lg bg-red-600 p-2 opacity-100">
                     <p className="text-base text-white font-regular">
-                      {/* {errors.images} */}
-                      {Swal.fire({
-                        title: "Good job!",
-                        text: errors.images,
-                        icon: "warning",
-                      })}
+                      {errors.images}
                     </p>
                   </div>
                 )}
