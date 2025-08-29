@@ -5,7 +5,7 @@ import {
   NavbarContent,
   NavbarItem,
   Button,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import metroidLogo from "../assets/img/metroid-logo.png";
 import { useAuth } from "../context/AuthContext";
 
