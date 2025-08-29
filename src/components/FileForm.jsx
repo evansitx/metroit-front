@@ -1,6 +1,6 @@
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { Button, Image } from "@nextui-org/react";
+import { Button, Image, addToast, ToastProvider, Alert } from "@heroui/react";
 import { useState } from "react";
 import axios from "axios";
 import FileFolderInput from "./FileFolderInput";
@@ -86,7 +86,7 @@ const FileForm = () => {
                   }
                 />
                 {errors.images && touched.images && (
-                  <div className=" mt-2 relative block w-full rounded-lg bg-red-600 p-2 opacity-100">
+                  <div className="mt-2 relative block w-full rounded-lg bg-red-600 p-2 opacity-100">
                     <p className="text-base text-white font-regular">
                       {errors.images}
                     </p>
@@ -106,16 +106,31 @@ const FileForm = () => {
                   </div>
                 )}
               </div>
+
               {values.images.length > 0 && (
                 <div>
-                  <Button onClick={resetForm}>Limpiar</Button>
+                  <Button
+                    color={"primary"}
+                    variant={"flat"}
+                    onPress={() => {
+                      addToast({
+                        title: "Borrado correcto",
+                        description: "Se han borrado todos los archivos",
+                        color: "success",
+                        timeout: 2500,
+                      });
+                      resetForm();
+                    }}
+                  >
+                    Limpiar
+                  </Button>
                 </div>
               )}
 
               <div>
                 <Button
                   color="primary"
-                  onClick={handleSubmit}
+                  onPress={handleSubmit}
                   isLoading={isSubmitting}
                 >
                   {isSubmitting ? "Procesando..." : "Procesar imágenes"}
@@ -140,6 +155,13 @@ const FileForm = () => {
                           key={index}
                           className="border p-2 rounded-md border-blue-600"
                         >
+                          <Image
+                            src={previews[index]?.url}
+                            alt={`Previsualización de ${file.name}`}
+                            width={200}
+                            className="rounded-md mb-3"
+                          />
+
                           <p className="text-sm">
                             <strong>Nombre:</strong> {file.name} <br />
                             <strong>Ruta:</strong> {file.path} <br />
@@ -147,12 +169,6 @@ const FileForm = () => {
                             <br />
                             <strong>Tipo:</strong> {file?.file?.type}
                           </p>
-                          <Image
-                            src={previews[index]?.url}
-                            alt={`Previsualización de ${file.name}`}
-                            width={200}
-                            className="rounded-md mt-3"
-                          />
                         </li>
                       ))}
                     </ul>
@@ -161,8 +177,6 @@ const FileForm = () => {
               </div>
             </div>
           </div>
-
-          <br />
         </>
       )}
     </Formik>
