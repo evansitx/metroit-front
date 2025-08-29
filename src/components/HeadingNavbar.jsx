@@ -32,6 +32,11 @@ const HeadingNavbar = () => {
               Campaign
             </Link>
           </NavbarItem>
+          <NavbarItem>
+            <Link to="/trendyol" color="foreground" href="#">
+              TrendyOL
+            </Link>
+          </NavbarItem>
         </NavbarContent>
         <NavbarContent justify="end">
           <NavbarItem className="hidden lg:flex">

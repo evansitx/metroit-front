@@ -6,6 +6,7 @@ import NotFound from "../pages/NotFound";
 import Campaign from "../pages/Campaign";
 import Login from "../pages/Login";
 import PrivateLayout from "../layout/PrivateLayout";
+import TrendyOl from "../pages/TrendyOl";
 
 const router = createBrowserRouter([
   // {
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
       {
         path: "campaign",
         element: <Campaign />,
+      },
+      {
+        path: "trendyol",
+        element: <TrendyOl />,
       },
       {
         path: "*",
