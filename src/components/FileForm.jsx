@@ -1,21 +1,37 @@
 import { Formik } from "formik";
-import * as Yup from "yup";
-import { Button, Image, addToast, ToastProvider, Alert } from "@heroui/react";
+import { Button, addToast } from "@heroui/react";
 import { useState } from "react";
 import axios from "axios";
 import FileFolderInput from "./FileFolderInput";
+import useFormValidationSchema from "../hooks/useFormValidationSchema";
+import PropTypes from "prop-types";
+import ImageGallery from "./utils/ImageGallery";
 
-const FileForm = () => {
+const FileForm = ({
+  validationType,
+  clearButtonText,
+  sendButtonText,
+  httpRequest,
+}) => {
   const [previews, setPreviews] = useState([]);
   const [httpStatus, setHttpStatus] = useState(null);
+  const [files, setFiles] = useState([]);
 
-  const validationSchema = Yup.object().shape({
-    images: Yup.array().min(1, "Añade al menos un archivo"),
-  });
+  const validationSchema = useFormValidationSchema(validationType);
 
-  const handleFileChange = (event, setFieldValue) => {
-    // console.log(event);
-    const imageFiles = event.map((file) => ({
+  const handleFilesChange = (newFiles) => {
+    setFiles(newFiles);
+    if (validationType === "image") {
+      const previewUrls = newFiles.map((fileObj) => ({
+        name: fileObj.name,
+        url: URL.createObjectURL(fileObj),
+      }));
+      setPreviews(previewUrls);
+    }
+  };
+
+  const handleChange = (event, setFieldValue) => {
+    let filesArray = event.map((file) => ({
       file: file,
       name: file.name,
       type: file.type,
@@ -23,33 +39,41 @@ const FileForm = () => {
       size: file.size,
     }));
 
-    const previewUrls = imageFiles.map((fileObj) => ({
-      name: fileObj.name,
-      url: URL.createObjectURL(fileObj.file),
-    }));
+    setFieldValue(validationType, filesArray);
+  };
 
-    setPreviews(previewUrls);
-    setFieldValue("images", imageFiles);
+  const resetFiles = () => {
+    setFiles([]);
+    setPreviews([]);
+    previews.forEach((preview) => URL.revokeObjectURL(preview.url));
+    addToast({
+      title: "Borrado correcto",
+      description: "Se han borrado todos los archivos",
+      color: "success",
+      timeout: 2500,
+    });
   };
 
   const onSubmit = (values, { resetForm, setSubmitting }) => {
     const bodyFormData = new FormData();
-    values.images.forEach((file) => {
-      bodyFormData.append("images", file.file || file);
+    values[validationType].forEach((file) => {
+      bodyFormData.append(validationType, file.file || file);
     });
-    console.log(values.images);
 
     axios
-      .post(`${import.meta.env.VITE_API_URL}/campaign/make`, bodyFormData, {
+      .post(httpRequest, bodyFormData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       })
       .then(function (response) {
         console.log(response);
-        // console.log(values);
         setHttpStatus(response);
         resetForm();
+        resetFiles(); // Limpiamos los archivos después del envío
+        console.log(
+          `Se han enviado ${values[validationType]?.length} archivos`
+        );
       })
       .catch(function (error) {
         console.log(error);
@@ -58,12 +82,11 @@ const FileForm = () => {
       .finally(() => {
         setSubmitting(false);
       });
-    console.log(`Se han enviado ${values?.images?.length} archivos`);
   };
 
   return (
     <Formik
-      initialValues={{ images: [] }}
+      initialValues={{ [validationType]: [] }}
       onSubmit={onSubmit}
       validationSchema={validationSchema}
     >
@@ -73,7 +96,6 @@ const FileForm = () => {
         errors,
         touched,
         isSubmitting,
-        values,
         resetForm,
       }) => (
         <>
@@ -81,17 +103,21 @@ const FileForm = () => {
             <div className="flex gap-2 flex-col">
               <div className="w-full">
                 <FileFolderInput
-                  onFilesChange={(event) =>
-                    handleFileChange(event, setFieldValue)
-                  }
+                  onFilesChange={(files) => {
+                    handleFilesChange(files);
+                    handleChange(files, setFieldValue);
+                  }}
+                  value={files} // Pasamos el estado del padre
                 />
-                {errors.images && touched.images && (
+
+                {errors[validationType] && touched[validationType] && (
                   <div className="mt-2 relative block w-full rounded-lg bg-red-600 p-2 opacity-100">
                     <p className="text-base text-white font-regular">
-                      {errors.images}
+                      {errors[validationType]}
                     </p>
                   </div>
                 )}
+
                 {httpStatus != null && (
                   <div
                     className={`mt-2 relative block w-full rounded-lg 
@@ -107,71 +133,48 @@ const FileForm = () => {
                 )}
               </div>
 
-              {values.images.length > 0 && (
-                <div>
-                  <Button
-                    color={"primary"}
-                    variant={"flat"}
-                    onPress={() => {
-                      addToast({
-                        title: "Borrado correcto",
-                        description: "Se han borrado todos los archivos",
-                        color: "success",
-                        timeout: 2500,
-                      });
-                      resetForm();
-                    }}
-                  >
-                    Limpiar
-                  </Button>
-                </div>
-              )}
-
               <div>
-                <Button
-                  color="primary"
-                  onPress={handleSubmit}
-                  isLoading={isSubmitting}
-                >
-                  {isSubmitting ? "Procesando..." : "Procesar imágenes"}
-                </Button>
-              </div>
-            </div>
-            <div>
-              <div className="mt-2">
-                {values?.images && previews.length > 0 && (
+                {files.length > 0 && (
                   <>
-                    {values.images.length > 0 && (
-                      <div>
-                        <p>
-                          Se han cargado {values?.images?.length} archivo(s)
-                        </p>
+                    <div className="flex gap-2">
+                      <Button
+                        color="primary"
+                        onPress={handleSubmit}
+                        isLoading={isSubmitting}
+                      >
+                        {isSubmitting
+                          ? "Procesando..."
+                          : sendButtonText || "Enviar archivos"}
+                      </Button>
+                      <Button
+                        color="danger"
+                        variant="flat"
+                        onPress={() => {
+                          resetForm();
+                          resetFiles(); // Limpiamos los archivos
+                        }}
+                      >
+                        {clearButtonText || "Borrar archivos"}
+                      </Button>
+                    </div>
+                    <div>
+                      <div className="mt-2">
+                        <div>
+                          <p>Se ha cargado {files.length} archivo(s)</p>
+                        </div>
                       </div>
-                    )}
 
-                    <ul className="grid grid-cols-5 gap-2 my-2">
-                      {values.images.map((file, index) => (
-                        <li
-                          key={index}
-                          className="border p-2 rounded-md border-blue-600"
-                        >
-                          <Image
-                            src={previews[index]?.url}
-                            alt={`Previsualización de ${file.name}`}
+                      {validationType === "image" && previews.length > 0 && (
+                        <div className="mt-2">
+                          <ImageGallery
+                            files={files}
+                            previews={previews}
+                            imageInfo={true}
                             width={200}
-                            className="rounded-md mb-3"
                           />
-
-                          <p className="text-sm">
-                            <strong>Nombre:</strong> {file.name} <br />
-                            <strong>Ruta:</strong> {file.path} <br />
-                            <strong>Tamaño:</strong> {file.size} bytes
-                            <br />
-                            <strong>Tipo:</strong> {file?.file?.type}
-                          </p>
-                        </li>
-                      ))}
-                    </ul>
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
@@ -181,6 +184,13 @@ const FileForm = () => {
       )}
     </Formik>
   );
+};
+
+FileForm.propTypes = {
+  validationType: PropTypes.string.isRequired,
+  clearButtonText: PropTypes.string,
+  sendButtonText: PropTypes.string,
+  httpRequest: PropTypes.string,
 };
 
 export default FileForm;
