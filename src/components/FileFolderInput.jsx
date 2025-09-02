@@ -1,12 +1,9 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
-
-const FileFolderInput = ({ onFilesChange }) => {
-  const [items, setItems] = useState([]);
+const FileFolderInput = ({ onFilesChange, value = [] }) => {
+  // Nuevos props para control desde el padre
 
   const handleDrop = async (event) => {
     event.preventDefault();
-
     const dtItems = event.dataTransfer.items;
     const newFiles = [];
 
@@ -16,7 +13,9 @@ const FileFolderInput = ({ onFilesChange }) => {
       const entry = item.webkitGetAsEntry?.();
       if (entry) {
         if (entry.isFile) {
-          promises.push(getFile(entry).then((f) => f && newFiles.push(f)));
+          promises.push(
+            getFile(entry).then((files) => files && newFiles.push(files))
+          );
         } else if (entry.isDirectory) {
           promises.push(
             readDirectory(entry).then((dirFiles) => {
@@ -29,24 +28,26 @@ const FileFolderInput = ({ onFilesChange }) => {
 
     await Promise.all(promises);
 
-    setItems((prev) => {
+    // Usamos el callback del padre en lugar de estado local
+    if (onFilesChange) {
       // Nombres de los ya existentes
-      const existingNames = new Set(prev.map((f) => f.name));
+      const existingNames = new Set(value.map((f) => f.name));
 
       // Filtrar duplicados
-      const uniqueNewFiles = newFiles.filter((f) => !existingNames.has(f.name));
+      const uniqueNewFiles = newFiles.filter(
+        (files) => !existingNames.has(files.name)
+      );
 
-      const merged = [...prev, ...uniqueNewFiles];
-      if (onFilesChange) onFilesChange(merged);
-      return merged;
-    });
+      const merged = [...value, ...uniqueNewFiles];
+      onFilesChange(merged);
+    }
   };
 
   const handleDragOver = (event) => {
     event.preventDefault();
   };
 
-  // Helpers
+  // Helpers (se mantienen igual)
   const getFile = (fileEntry) =>
     new Promise((resolve) => fileEntry.file(resolve));
 
@@ -69,7 +70,7 @@ const FileFolderInput = ({ onFilesChange }) => {
                 allFiles.push(...subDirFiles);
               }
             }
-            readEntries(); // seguir leyendo si hay más
+            readEntries();
           }
         });
       };
@@ -85,20 +86,10 @@ const FileFolderInput = ({ onFilesChange }) => {
           onDragOver={handleDragOver}
           className="w-full h-32 border-2 border-dashed border-blue-600 flex items-center justify-center rounded-lg cursor-pointer hover:bg-blue-50 transition-colors"
         >
-          <p className="text-gray-600 text-sm">
-            Arrastra aquí archivos o carpetas
+          <p className="text-center text-gray-600">
+            Arrastra y suelta archivos o carpetas aquí
           </p>
         </div>
-
-        {/* {items.length > 0 && (
-          <ul className="mt-3 list-disc list-inside text-sm text-gray-700 max-h-40 overflow-y-auto">
-            {items.map((file, index) => (
-              <li key={`${file.name}-${index}`}>
-                {file.webkitRelativePath || file.name}
-              </li>
-            ))}
-          </ul>
-        )} */}
       </div>
     </>
   );
