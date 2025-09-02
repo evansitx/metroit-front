@@ -25,11 +25,13 @@ const BackToTop = () => {
   }`;
 
   return (
-    <div className="fixed bottom-5 right-5 z-10">
-      <button className={buttonClassName} onClick={handleClick}>
-        <i className="fa-solid fa-arrow-up"></i>
-      </button>
-    </div>
+    <>
+      <div className="fixed bottom-5 right-5 z-10">
+        <button className={buttonClassName} onClick={handleClick}>
+          <i className={showButton && "fa-solid fa-arrow-up"}></i>
+        </button>
+      </div>
+    </>
   );
 };
 
