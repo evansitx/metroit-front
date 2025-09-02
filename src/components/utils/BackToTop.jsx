@@ -28,7 +28,9 @@ const BackToTop = () => {
     <>
       <div className="fixed bottom-5 right-5 z-10">
         <button className={buttonClassName} onClick={handleClick}>
-          <i className={showButton && "fa-solid fa-arrow-up"}></i>
+          <i
+            className={showButton ? "fa-solid fa-arrow-up text-white" : ""}
+          ></i>
         </button>
       </div>
     </>
