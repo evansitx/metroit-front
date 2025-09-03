@@ -1,11 +1,11 @@
 import { Formik } from "formik";
 import { Button, addToast } from "@heroui/react";
 import { useState } from "react";
-import axios from "axios";
 import FileFolderInput from "./FileFolderInput";
 import useFormValidationSchema from "../hooks/useFormValidationSchema";
 import PropTypes from "prop-types";
 import ImageGallery from "./utils/ImageGallery";
+import useAxios from "../hooks/useAxios";
 
 const FileForm = ({
   validationType,
@@ -14,10 +14,9 @@ const FileForm = ({
   httpRequest,
 }) => {
   const [previews, setPreviews] = useState([]);
-  const [httpStatus, setHttpStatus] = useState(null);
   const [files, setFiles] = useState([]);
-
   const validationSchema = useFormValidationSchema(validationType);
+  const { executeRequest, downloadFile } = useAxios();
 
   const handleFilesChange = (newFiles) => {
     setFiles(newFiles);
@@ -46,42 +45,40 @@ const FileForm = ({
     setFiles([]);
     setPreviews([]);
     previews.forEach((preview) => URL.revokeObjectURL(preview.url));
-    addToast({
-      title: "Borrado correcto",
-      description: "Se han borrado todos los archivos",
-      color: "success",
-      timeout: 2500,
-    });
   };
 
-  const onSubmit = (values, { resetForm, setSubmitting }) => {
+  const onSubmit = async (values, { resetForm, setSubmitting }) => {
+    console.log(values);
     const bodyFormData = new FormData();
     values[validationType].forEach((file) => {
       bodyFormData.append(validationType, file.file || file);
     });
-
-    axios
-      .post(httpRequest, bodyFormData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then(function (response) {
-        console.log(response);
-        setHttpStatus(response);
-        resetForm();
-        resetFiles(); // Limpiamos los archivos después del envío
-        console.log(
-          `Se han enviado ${values[validationType]?.length} archivos`
-        );
-      })
-      .catch(function (error) {
-        console.log(error);
-        setHttpStatus(error);
-      })
-      .finally(() => {
-        setSubmitting(false);
+    try {
+      const response = await executeRequest(httpRequest, bodyFormData);
+      console.log(response);
+      downloadFile(response);
+      // reseteamos el formulario y los archivos
+      resetFiles();
+      resetForm();
+      addToast({
+        title: "Éxito",
+        description: "Los archivos se han enviado correctamente",
+        color: "success",
+        timeout: 3500,
       });
+    } catch (error) {
+      console.log("Error en la descarga:", error);
+      addToast({
+        title: "Error",
+        description:
+          "Hubo un error al enviar los archivos, inténtalo de nuevo más tarde. Código de error: " +
+          (error.message ? `${error.message}` : ""),
+        color: "danger",
+        timeout: 3500,
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -99,7 +96,7 @@ const FileForm = ({
         resetForm,
       }) => (
         <>
-          <div className="w-3/4">
+          <div className="w-full max-w-[1024px] mx-auto p-4">
             <div className="flex gap-2 flex-col">
               <div className="w-full">
                 <FileFolderInput
@@ -114,20 +111,6 @@ const FileForm = ({
                   <div className="mt-2 relative block w-full rounded-lg bg-red-600 p-2 opacity-100">
                     <p className="text-base text-white font-regular">
                       {errors[validationType]}
-                    </p>
-                  </div>
-                )}
-
-                {httpStatus != null && (
-                  <div
-                    className={`mt-2 relative block w-full rounded-lg 
-                      ${
-                        httpStatus.data ? "bg-green-600" : "bg-red-600"
-                      } p-2 opacity-100`}
-                  >
-                    <p className="text-base text-white font-regular">
-                      {httpStatus?.data?.status}
-                      {httpStatus?.message}
                     </p>
                   </div>
                 )}
@@ -152,6 +135,12 @@ const FileForm = ({
                         onPress={() => {
                           resetForm();
                           resetFiles(); // Limpiamos los archivos
+                          addToast({
+                            title: "Borrado correcto",
+                            description: "Se han borrado todos los archivos",
+                            color: "warning",
+                            timeout: 2500,
+                          });
                         }}
                       >
                         {clearButtonText || "Borrar archivos"}
