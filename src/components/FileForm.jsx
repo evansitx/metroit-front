@@ -6,12 +6,14 @@ import useFormValidationSchema from "../hooks/useFormValidationSchema";
 import PropTypes from "prop-types";
 import ImageGallery from "./utils/ImageGallery";
 import useAxios from "../hooks/useAxios";
+// import { TrashIcon } from "@heroicons/react/24/outline";
 
 const FileForm = ({
   validationType,
   clearButtonText,
   sendButtonText,
   httpRequest,
+  fileName,
 }) => {
   const [previews, setPreviews] = useState([]);
   const [files, setFiles] = useState([]);
@@ -20,13 +22,14 @@ const FileForm = ({
 
   const handleFilesChange = (newFiles) => {
     setFiles(newFiles);
-    if (validationType === "image") {
-      const previewUrls = newFiles.map((fileObj) => ({
-        name: fileObj.name,
-        url: URL.createObjectURL(fileObj),
-      }));
-      setPreviews(previewUrls);
-    }
+    console.log(newFiles)
+    const previewUrls = newFiles.map((fileObj) => ({
+      name: fileObj.name,
+      url: fileObj.type.startsWith("image/")
+        ? URL.createObjectURL(fileObj)
+        : "../../img/archive-icon.png",
+    }));
+    setPreviews(previewUrls);
   };
 
   const handleChange = (event, setFieldValue) => {
@@ -39,6 +42,48 @@ const FileForm = ({
     }));
 
     setFieldValue(validationType, filesArray);
+  };
+
+  // Función para eliminar un archivo individual
+  const removeFile = (index, setFieldValue) => {
+    // Crear nuevas arrays sin el elemento a eliminar
+    const newFiles = [...files];
+    const newPreviews = [...previews];
+
+    if (validationType === "image") {
+      URL.revokeObjectURL(newPreviews[index].url);
+    }
+
+    // Eliminar el elemento
+    newFiles.splice(index, 1);
+    newPreviews.splice(index, 1);
+
+    // Actualizar estados
+    setFiles(newFiles);
+    setPreviews(newPreviews);
+
+    // Actualizar Formik
+    const formikFiles = newFiles.map((fileObj) => ({
+      file: fileObj,
+      name: fileObj.name,
+      type: fileObj.type,
+      path: fileObj.webkitRelativePath,
+      size: fileObj.size,
+    }));
+
+    setFieldValue(validationType, formikFiles);
+
+    addToast({
+      title: "Archivo eliminado",
+      description: "El archivo ha sido eliminado correctamente",
+      color: "warning",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+          <path d="M232.7 69.9L224 96L128 96C110.3 96 96 110.3 96 128C96 145.7 110.3 160 128 160L512 160C529.7 160 544 145.7 544 128C544 110.3 529.7 96 512 96L416 96L407.3 69.9C402.9 56.8 390.7 48 376.9 48L263.1 48C249.3 48 237.1 56.8 232.7 69.9zM512 208L128 208L149.1 531.1C150.7 556.4 171.7 576 197 576L443 576C468.3 576 489.3 556.4 490.9 531.1L512 208z" />
+        </svg>
+      ),
+      timeout: 2500,
+    });
   };
 
   const resetFiles = () => {
@@ -56,7 +101,7 @@ const FileForm = ({
     try {
       const response = await executeRequest(httpRequest, bodyFormData);
       console.log(response);
-      downloadFile(response);
+      downloadFile(response, fileName);
       // reseteamos el formulario y los archivos
       resetFiles();
       resetForm();
@@ -139,6 +184,14 @@ const FileForm = ({
                             title: "Borrado correcto",
                             description: "Se han borrado todos los archivos",
                             color: "warning",
+                            icon: (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 640 640"
+                              >
+                                <path d="M232.7 69.9L224 96L128 96C110.3 96 96 110.3 96 128C96 145.7 110.3 160 128 160L512 160C529.7 160 544 145.7 544 128C544 110.3 529.7 96 512 96L416 96L407.3 69.9C402.9 56.8 390.7 48 376.9 48L263.1 48C249.3 48 237.1 56.8 232.7 69.9zM512 208L128 208L149.1 531.1C150.7 556.4 171.7 576 197 576L443 576C468.3 576 489.3 556.4 490.9 531.1L512 208z" />
+                              </svg>
+                            ),
                             timeout: 2500,
                           });
                         }}
@@ -152,17 +205,17 @@ const FileForm = ({
                           <p>Se ha cargado {files.length} archivo(s)</p>
                         </div>
                       </div>
-
-                      {validationType === "image" && previews.length > 0 && (
-                        <div className="mt-2">
-                          <ImageGallery
-                            files={files}
-                            previews={previews}
-                            imageInfo={true}
-                            width={200}
-                          />
-                        </div>
-                      )}
+                      <div className="mt-2">
+                        <ImageGallery
+                          files={files}
+                          previews={previews}
+                          imageInfo={true}
+                          width={200}
+                          onRemoveFile={(index) =>
+                            removeFile(index, setFieldValue)
+                          }
+                        />
+                      </div>
                     </div>
                   </>
                 )}
@@ -180,6 +233,7 @@ FileForm.propTypes = {
   clearButtonText: PropTypes.string,
   sendButtonText: PropTypes.string,
   httpRequest: PropTypes.string,
+  fileName: PropTypes.string,
 };
 
 export default FileForm;
