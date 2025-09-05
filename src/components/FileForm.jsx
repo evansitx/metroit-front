@@ -22,7 +22,7 @@ const FileForm = ({
 
   const handleFilesChange = (newFiles) => {
     setFiles(newFiles);
-    console.log(newFiles)
+    console.log(newFiles);
     const previewUrls = newFiles.map((fileObj) => ({
       name: fileObj.name,
       url: fileObj.type.startsWith("image/")
@@ -209,6 +209,7 @@ const FileForm = ({
                         <ImageGallery
                           files={files}
                           previews={previews}
+                          removeFiles={true}
                           imageInfo={true}
                           width={200}
                           onRemoveFile={(index) =>
