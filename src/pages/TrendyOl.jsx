@@ -7,7 +7,8 @@ const TrendyOl = () => {
         validationType="excel"
         clearButtonText="Eliminar archivos"
         sendButtonText="Enviar archivos"
-        httpRequest={import.meta.env.VITE_API_TRENDY_OL_SERVICE}
+        fileName="trendyOl.zip"
+        httpRequest={import.meta.env.VITE_API_TRENDYOL_SERVICE}
       />
     </>
   );
