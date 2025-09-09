@@ -3,6 +3,7 @@ import FileForm from "../components/FileForm";
 const TrendyOl = () => {
   return (
     <>
+      <h1>Esto es TrendyOL</h1>
       <FileForm
         validationType="excel"
         clearButtonText="Eliminar archivos"

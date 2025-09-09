@@ -5,16 +5,19 @@ const Footer = () => {
     <footer className="bg-white dark:bg-gray-900 bottom-0 w-full border-gray-200 dark:border-gray-700 border">
       <div className="container px-6 py-8 mx-auto max-w-[1024px]">
         <div className="flex flex-col items-center text-center">
-          <Link href="/">
+          <Link to="/">
             <img className="w-[50px]" src={metroidLogo} alt="" />
           </Link>
 
-          <p className="max-w-md mx-auto mt-4 text-gray-500 dark:text-gray-400">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit.
+          <p className="max-w-md mx-auto mt-4 text-red-700 dark:text-gray-400 uppercase font-bold animate-bounce">
+            Esto es una demo. Si peta, avisa.
           </p>
 
           <div className="flex flex-col mt-4 sm:flex-row sm:items-center sm:justify-center">
-            <button className="flex items-center justify-center order-1 w-full px-2 py-2 mt-3 text-sm tracking-wide text-gray-600 transition-colors duration-300 transform border rounded-md sm:mx-2 dark:border-gray-400 dark:text-gray-300 sm:mt-0 sm:w-auto hover:bg-gray-50 focus:outline-none focus:ring dark:hover:bg-gray-800 focus:ring-gray-300 focus:ring-opacity-40">
+            <Link
+              to="/"
+              className="flex items-center justify-center order-1 w-full px-2 py-2 mt-3 text-sm tracking-wide text-gray-600 transition-colors duration-300 transform border rounded-md sm:mx-2 dark:border-gray-400 dark:text-gray-300 sm:mt-0 sm:w-auto hover:bg-gray-50 focus:outline-none focus:ring dark:hover:bg-gray-800 focus:ring-gray-300 focus:ring-opacity-40"
+            >
               <svg
                 className="w-5 h-5 mx-1"
                 viewBox="0 0 24 24"
@@ -28,11 +31,13 @@ const Footer = () => {
               </svg>
 
               <span className="mx-1">Ir a la home</span>
-            </button>
-
-            <button className="w-full px-5 py-2 text-sm tracking-wide text-white transition-colors duration-300 transform bg-blue-600 rounded-md sm:mx-2 sm:order-2 sm:w-auto hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">
+            </Link>
+            <Link
+              to="/campaign"
+              className="w-full px-5 py-2 text-sm tracking-wide text-white transition-colors duration-300 transform bg-blue-600 rounded-md sm:mx-2 sm:order-2 sm:w-auto hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
+            >
               Ir a las campañas
-            </button>
+            </Link>
           </div>
         </div>
 

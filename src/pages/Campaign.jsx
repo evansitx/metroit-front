@@ -3,6 +3,9 @@ import FileForm from "../components/FileForm";
 const Campaign = () => {
   return (
     <>
+      <div>
+        <h1>Esto es Campañas</h1>
+      </div>
       <FileForm
         validationType="image"
         clearButtonText="Eliminar imágenes"
